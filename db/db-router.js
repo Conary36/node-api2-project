@@ -88,9 +88,86 @@ router.get('/:id', (req,res) => {
 })
 
 //GET /api/posts/:id/comments	Returns an array of all the comment objects associated with the post with the specified id.
+router.get('/:id/comments', (req, res)=>{
+    const {id} = req.params;
+    !id ? res.status(404).json({ success: false, errorMessage: "The post with the specified ID does not exist."}):
+    Datahubs.findPostComments(id)
+            .then(data =>{
+                res.status(200).json(data)
+            })
+            .catch(err =>{
+                res
+                .status(500)
+                .json({
+                    success: false,
+                    errorMessage: "The comments information could not be retrieved.", err
+                 })
+            })
+})
 
 
 //DELETE /api/posts/:id	Removes the post with the specified id and returns the deleted post object.You may need to make additional calls to the database in order to satisfy this requirement.
+router.delete('/:id', (req, res)=>{
+    const {id} = req.params;
+    Datahubs.findById(id)
+            .then(data =>{
+                data ?
+    Datahubs.remove(id)
+            .then(i=> {
+                if(i){
+                res.status(200).json({
+                url: `/${id}`,
+                operation: `Delete post with id ${id}`
+                })
+             }
+         })
+            .catch(err => {
+                 console.log(err)
+             res.status(500).json({
+                 error: 'The post could not be removed'
+              });
+          })
+            : res.status(404).json({
+               message: 'The post with the specified ID does not exist.'
+         })
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500).json({
+                error: 'The post information could not be retrieved.'
+            });
+        })
+
+})
+// router.delete('/:id', (req, res) => {
+//     const { id } = req.params
+//     Posts.findById(id)
+//         .then(post => {
+//             post
+//                 ? Posts.remove(id)
+//                     .then(deleted => {
+//                         if (deleted) {
+//                             res.status(204).json(post)
+//                         }
+//                     })
+//                     .catch(err => {
+//                         console.log(err)
+//                         res.status(500).json({
+//                             error: 'The post could not be removed'
+//                         });
+//                     })
+//                 : res.status(404).json({
+//                     message: 'The post with the specified ID does not exist.'
+//                 })
+//         })
+//         .catch(err => {
+//             console.log(err)
+//             res.status(500).json({
+//                 error: 'The post information could not be retrieved.'
+//             });
+//         })
+// })
+
 
 //PUT /api/posts/:id
 
